@@ -9,6 +9,7 @@ from PIL import ImageTk, Image
 import subprocess
 import platform
 import ntpath
+from image_processing import *
 
 class ApplicationView:
     def __init__(self):
@@ -45,6 +46,16 @@ class ApplicationView:
         buttons_width = 13
 
         self.create_button(parent=self.buttonsFrame,text="Load image",width=buttons_width,command=self.load_image_with_ask)
+        self.create_button(parent=self.buttonsFrame,text="Make grayscale",width=buttons_width,command=lambda: self.image_process("grayscale"))
+        binary_frame = tk.Frame(self.buttonsFrame)
+        binary_frame.pack( side = "top", padx = 5, pady = 0)
+        self.create_button(parent=binary_frame,text="Make binary",width=buttons_width,command=lambda: self.image_process("binary"),pady=1)
+        b_label = tk.Label(binary_frame, text = "Treshhold", width = 7)
+        b_label.pack(side = "left")
+        self.binary_treshhold = tk.StringVar()
+        b_field = tk.Entry(binary_frame, textvariable=self.binary_treshhold,width = 5)
+        b_field.pack( side = "right",padx = 3)
+        self.binary_treshhold.set(100)
 
         self.create_button(parent=self.buttonsFrame,text="Reset",width=buttons_width,command=lambda: self.load_image())
         self.create_button(parent=self.buttonsFrame,text="Save image",width=buttons_width,command=lambda: self.save_image(),pady=6)
@@ -75,9 +86,18 @@ class ApplicationView:
             return
         self.image.save(f.name)
 
-    def apply_filter(self, id):
+    def image_process(self,id):
         image = None
-
+        if id == "binary":
+            try:
+                b = int(self.binary_treshhold.get())
+                if  b < 0 or b > 255:
+                    return
+                image = image_processing.image_binary(self.imagecopy,b)
+            except:
+                pass
+        if id == "grayscale":
+            image = image_processing.grayscale(self.imagecopy)
         if image != None:
             self.change_image(image)
 
