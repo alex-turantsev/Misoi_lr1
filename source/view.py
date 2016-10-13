@@ -24,7 +24,7 @@ class ApplicationView:
         self.buttonsFrame = tk.Frame(app, width = 0)
         self.buttonsFrame.pack(side = "right",fill = "y")
 
-        self.image_path = '/Users/alex/Downloads/unspecified1.jpeg'
+        self.image_path = '/Users/alex/Downloads/unspecified2.jpeg'
         self.imageLabel = tk.Label(self.imageFrame)
         self.imageLabel.pack(fill = "both", expand = "True")
         self.image = None
@@ -56,6 +56,8 @@ class ApplicationView:
         b_field = tk.Entry(binary_frame, textvariable=self.binary_treshhold,width = 5)
         b_field.pack( side = "right",padx = 3)
         self.binary_treshhold.set(100)
+
+        self.create_button(parent=self.buttonsFrame,text="Select areas",width=buttons_width,command=lambda: self.image_process("areas"),pady=1)
 
         self.create_button(parent=self.buttonsFrame,text="Reset",width=buttons_width,command=lambda: self.load_image())
         self.create_button(parent=self.buttonsFrame,text="Save image",width=buttons_width,command=lambda: self.save_image(),pady=6)
@@ -98,6 +100,8 @@ class ApplicationView:
                 pass
         if id == "grayscale":
             image = image_processing.grayscale(self.imagecopy)
+        if id == "areas":
+            image = image_processing.area_selection(self.imagecopy)
         if image != None:
             self.change_image(image)
 
