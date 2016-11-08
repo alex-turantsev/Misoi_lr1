@@ -11,7 +11,7 @@ import platform
 import ntpath
 from image_processing import *
 
-class ApplicationView:
+class ApplicationView(object):
     def __init__(self):
         pass
 

@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: iso-8859-1 -*-
-import numpy
+from image_areas import *
 
-class image_processing():
+class image_processing(object):
     @staticmethod
     def image_binary(image,threshold):
         image_copy = image.copy()
@@ -34,53 +34,38 @@ class image_processing():
         image_copy = image.copy()
         pixels = image_copy.load()
         width, height = image.size
-        areas = numpy.zeros((width, height)).astype(int)
-        areas1 = []
-        areas1.append([])
+        areas = image_areas(width=width,height=height)
         n = 0
         #print_pixles(pixels, width, height)
         for i in range(width):
             for j in range(height):
                 if get_binary_pixel(pixels[i,j]) == 0:
-                    up = areas[i,max(0,j-1)]
-                    left = areas[max(0,i-1),j]
+                    up, left = areas.get_up_and_left(i,j)
                     if up == 0 and left == 0:
                         n += 1
-                        areas1.append([])
-                        areas1[n].append((i,j))
-                        areas[i,j] = n
+                        areas.add_new_area()
+                        areas.add_pixel_to_area(n-1,i,j)
                         pixels[i,j] = color[n % len(color)]
                     else:
                         if left != 0 and up == 0:
-                            areas[i,j] = left
-                            areas1[left].append((i,j))
-                            #print i,j,areas[max(0,i-1),j],"i-1"
+                            areas.add_pixel_to_area(left,i,j)
                         elif left == 0 and up != 0:
-                            areas[i,j] = up
-                            areas1[up].append((i,j))
-                            #print i,j,areas[i,max(0,j-1)],"j-1"
+                            areas.add_pixel_to_area(up,i,j)
                         elif left != up:
-                            #print left, up
-                            areas1[up].extend(areas1[left])
-                            areas[i,j] = up
-                            areas1[up].append((i,j))
-                            for i1,j1 in areas1[left]:
-                                areas[i1,j1] = up
-                            areas1[left] = []
+                            areas.add_pixel_to_area(up,i,j)
+                            areas.merge_areas(up, left)
                         else:
-                            areas[i,j] = up
-                            areas1[up].append((i,j))
+                            areas.add_pixel_to_area(up,i,j)
         #print areas
         for i in range(width):
             for j in range(height):
-                if areas[i,j] != 0:
-                    pixels[i,j] = color[areas[i,j] % len(color)]
-        count = 0
-        for item in areas1:
-            if len(item) > 1:
-                count += 1
-                print len(item)
-        print count
+                area = areas.get_area_on_pixel(i,j)
+                if area != 0:
+                    pixels[i,j] = color[area % len(color)]
+
+        areas.print_areas_number()
+        areas.compute_attrubutes()
+
         return image_copy
 
 def get_binary_pixel(pixel):
