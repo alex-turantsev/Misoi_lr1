@@ -65,7 +65,13 @@ class image_processing(object):
 
         areas.print_areas_number()
         areas.compute_attrubutes()
+        clusters = areas.compute_clusters()
 
+        areas_attributes = areas.areas_atributes
+        for i in range(len(clusters)):
+            for j in range(len(clusters[i])):
+                for k in areas_attributes[clusters[i][j]].pixels:
+                    pixels[k[0],k[1]] = color[i % len(color)]
         return image_copy
 
 def get_binary_pixel(pixel):

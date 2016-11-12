@@ -2,6 +2,7 @@
 # -*- coding: iso-8859-1 -*-
 import numpy
 import math
+from kmeans import kmeans
 
 class image_areas(object):
     def __init__(self, width, height):
@@ -39,20 +40,30 @@ class image_areas(object):
         print count
 
     def compute_attrubutes(self):
-        attributes = []
+        self.areas_atributes = []
         for area in self.areas_pixels:
             if len(area) > 1:
-                attributes.append(area_attribute(area,self.pixel_grid))
-        print attributes
+                self.areas_atributes.append(area_attribute(area,self.pixel_grid))
+
+    def compute_clusters(self):
+        points = [[attr.density, attr.elongation] for attr in self.areas_atributes]
+        k = kmeans(points)
+        clusters = []
+        for i in range(len(k)):
+            clusters.append([])
+            for el in k[i]:
+                clusters[i].append(points.index(el))
+        return clusters
 
 class area_attribute(object):
+    pixels = []
     perimetr = 0
     square = 0
     elongation = 0
     main_axis_orientation = 0
     def __init__(self, area, grid):
         self.square = len(area)
-
+        self.pixels = area
         min_x = 10000
         max_x = 0
         min_y = 10000
@@ -62,7 +73,7 @@ class area_attribute(object):
         m11 = 0
         m02 = 0
         m20 = 0
-        for i,j in area:
+        for i,j in self.pixels:
             xI += i
             yI += j
             if self.is_border_pixel(i,j, grid):
@@ -78,7 +89,7 @@ class area_attribute(object):
         self.mass_center = (xI/self.square, yI/self.square)
         self.density = (self.perimetr**2)/self.square
 
-        for i,j in area:
+        for i,j in self.pixels:
             m20 = m20 + (i - self.mass_center[0])**2
             m02 = m02 + (j - self.mass_center[1])**2
             m11 = m11 + (i - self.mass_center[0]) * (j - self.mass_center[1])
